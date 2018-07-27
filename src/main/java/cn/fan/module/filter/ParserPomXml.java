@@ -29,18 +29,37 @@ public class ParserPomXml {
      * @throws DocumentException xml文档解析出错
      * @throws IOException 文件流异常
      */
-    public static boolean oneStopAddAndChange(String[] values,String xmlFilePath,String aimXmlPath) throws DocumentException, IOException {
+    public static boolean oneStopAddAndChange(String[] values,String xmlFilePath,String aimXmlPath) throws IOException {
         File file  =new File(xmlFilePath);
         if(file.exists()){
             SAXReader reader = new SAXReader();
-            Document document = reader.read(file);
+            Document document = null;
+            try {
+                document = reader.read(file);
+            } catch (DocumentException e) {
+                return false;
+
+            }
             Element rootElement = document.getRootElement();
             Element groupId = rootElement.element("groupId");
             Element artifactId = rootElement.element("artifactId");
             Element version = rootElement.element("version");
 
+            if(groupId==null||artifactId==null||version==null){
+                return false;
+            }
+
             //先添加dependency
-            Element dependencies = rootElement.element("dependencies");
+            Element dependencyManagement = rootElement.element("dependencyManagement");
+            Element dependencies = null;
+            if(dependencyManagement!=null) {
+               dependencies = dependencyManagement.element("dependencies");
+            }else{
+                dependencies =rootElement.element("dependencies");
+            }
+            if(dependencies==null){
+                return false;
+            }
             Element dependency = dependencies.addElement("dependency", rootElement.getNamespace().getURI());
             Element groupIdNew = dependency.addElement("groupId", rootElement.getNamespace().getURI());
             groupIdNew.setText(groupId.getStringValue());

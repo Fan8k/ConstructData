@@ -36,10 +36,15 @@ public class ExtractPom {
             }
             //开始判断是否需要回退
             if(flag[1]){
-               String fileName = path+UUID.randomUUID().toString()+".xml";
-               ParserPomXml.oneStopAddAndChange(values,pom.getPath(),fileName);
-                //路径和pom文件对应起来
-               projectToPom.put(files.toString(),fileName);
+               //建立项目名字目录
+                File pathNew = new File(path+"/"+pom.getParent().substring(pom.getParent().lastIndexOf('/')));
+                pathNew.mkdir();
+               String fileName = pathNew.getAbsolutePath()+"/pom.xml";
+               boolean succ = ParserPomXml.oneStopAddAndChange(values, pom.getPath(), fileName);
+               if(succ) {
+                   //路径和pom文件对应起来
+                   projectToPom.put(directory.getAbsolutePath(), fileName);
+               }
                return;
             }
             if(flag[0]||flag[2]){
@@ -54,5 +59,9 @@ public class ExtractPom {
                 }
             }
         }
+    }
+
+    public static HashMap<String, String> getProjectToPom() {
+        return projectToPom;
     }
 }
